@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db import get_db
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserRoleUpdate
 from app.services.user_service import (
     create_user,

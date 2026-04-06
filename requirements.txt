@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+psycopg2-binary
+passlib[argon2]
+pydantic
+pyjwt
+python-dotenv
+python-jose
+pydantic[email]
