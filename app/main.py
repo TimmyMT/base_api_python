@@ -24,8 +24,4 @@ def root():
 
 @app.on_event("startup")
 def on_startup():
-    # Создаем таблицы, если их нет
-    Base.metadata.create_all(bind=engine)
-
-    # Запускаем сид
     run_seed()

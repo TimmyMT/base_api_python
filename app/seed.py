@@ -1,33 +1,42 @@
-from app.db import SessionLocal
-from app.models.user import User
+from app.db import engine
 from sqlalchemy import text
 from argon2 import PasswordHasher
+from datetime import datetime
+
+ph = PasswordHasher()
 
 def run_seed():
-    db = SessionLocal()
-    ph = PasswordHasher()
+    with engine.connect() as conn:
+        users = [
+            {"email": "admin@example.com", "password": "admin123", "role": "admin"},
+            {"email": "manager@example.com", "password": "manager123", "role": "manager"},
+            {"email": "user@example.com", "password": "user123", "role": "user"},
+        ]
 
-    # Хэшируем пароль через argon2
-    password_plain = "admin123"
-    password_digest = ph.hash(password_plain)
+        for u in users:
+            result = conn.execute(
+                text("SELECT id FROM users WHERE email = :email"),
+                {"email": u["email"]}
+            ).fetchone()
 
-    sql = text("""
-    INSERT INTO users (email, password_digest, role)
-    SELECT :email, :password_digest, :role
-    WHERE NOT EXISTS (
-        SELECT 1 FROM users WHERE email = :email
-    )
-    """)
+            if not result:
+                password_digest = ph.hash(u["password"])
+                now = datetime.utcnow()
+                conn.execute(
+                    text(
+                        "INSERT INTO users (email, password_digest, role, is_active, created_at) "
+                        "VALUES (:email, :password_digest, :role, :is_active, :created_at)"
+                    ),
+                    {
+                        "email": u["email"],
+                        "password_digest": password_digest,
+                        "role": u["role"],
+                        "is_active": True,
+                        "created_at": now
+                    }
+                )
+                print(f"Seed: user {u['email']} created")
+            else:
+                print(f"Seed: user {u['email']} already exists")
 
-    db.execute(sql, {
-        "email": "admin@example.com",
-        "password_digest": password_digest,
-        "role": "admin"
-    })
-
-    db.commit()
-    print("Seed: admin user created if not exists")
-    db.close()
-
-if __name__ == "__main__":
-    run_seed()
+        conn.commit()
