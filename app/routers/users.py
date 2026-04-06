@@ -26,13 +26,22 @@ def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
+def _authorize(current_user: User, action: str, target_user: User = None):
+    # автоматически кидает HTTPException, если не авторизован
+    policy = UserPolicy(current_user)
+
+    if target_user:
+        getattr(policy, action)(target_user)
+    else:
+        getattr(policy, action)()
+
+
 @router.get("/", response_model=List[UserResponse])
 def index(
     db: Session = Depends(get_db), 
     current_user = Depends(get_current_user)
 ):
-    if not UserPolicy(current_user).index():
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _authorize(current_user, "index")
     return get_users(db)
 
 
@@ -41,8 +50,7 @@ def show(
     user = Depends(get_user_or_404), 
     current_user = Depends(get_current_user)
 ):
-    if not UserPolicy(current_user).show(user):
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _authorize(current_user, "show", user)
     return user
 
 
@@ -52,8 +60,7 @@ def create(
     db: Session = Depends(get_db), 
     current_user = Depends(get_current_user)
 ):
-    if not UserPolicy(current_user).create():
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _authorize(current_user, "create")
     validate_create_params(user)
     try:
         return create_user(db, user)
@@ -68,8 +75,7 @@ def update(
     db: Session = Depends(get_db), 
     current_user = Depends(get_current_user)
 ):
-    if not UserPolicy(current_user).update(user):
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _authorize(current_user, "update", user)
     validate_update_params(user_update)
     try:
         return update_user_by_id(db, user.id, user_update)
@@ -83,6 +89,5 @@ def destroy(
     db: Session = Depends(get_db), 
     current_user = Depends(get_current_user)
 ):
-    if not UserPolicy(current_user).destroy(user):
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _authorize(current_user, "destroy", user)
     delete_user_by_id(db, user.id)

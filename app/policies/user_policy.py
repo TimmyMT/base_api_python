@@ -1,26 +1,27 @@
-# app/policies/user_policy.py
+from fastapi import HTTPException
 from app.models.user import User
 
 class UserPolicy:
     def __init__(self, user: User):
         self.user = user
 
-    def index(self) -> bool:
-        # Только админ может смотреть список всех пользователей
-        return self.user.role == "admin"
+    # приватный метод для проверки
+    def _authorize(self, condition: bool):
+        if not condition:
+            raise HTTPException(status_code=403, detail="Not authorized")
+        return True
 
-    def show(self, target_user: User) -> bool:
-        # Админ видит всех, обычный пользователь видит только себя
-        return self.user.role == "admin" or self.user.id == target_user.id
+    def index(self):
+        return self._authorize(self.user.role == "admin")
 
-    def create(self) -> bool:
-        # Только админ может создавать пользователей
-        return self.user.role == "admin"
+    def show(self, target_user: User):
+        return self._authorize(self.user.role == "admin" or self.user.id == target_user.id)
 
-    def update(self, target_user: User) -> bool:
-        # Админ может обновлять всех, пользователь только себя
-        return self.user.role == "admin" or self.user.id == target_user.id
+    def create(self):
+        return self._authorize(self.user.role == "admin")
 
-    def destroy(self, target_user: User) -> bool:
-        # Только админ может удалять пользователей
-        return self.user.role == "admin"
+    def update(self, target_user: User):
+        return self._authorize(self.user.role == "admin" or self.user.id == target_user.id)
+
+    def destroy(self, target_user: User):
+        return self._authorize(self.user.role == "admin")
