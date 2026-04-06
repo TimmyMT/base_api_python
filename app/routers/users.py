@@ -15,8 +15,6 @@ from app.params.user_params import validate_create_params, validate_update_param
 
 router = APIRouter()
 
-
-# Dependency для получения пользователя или 404
 def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
     user = get_user_by_id(db, user_id)
     if not user:

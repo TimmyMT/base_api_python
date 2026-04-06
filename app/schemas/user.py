@@ -26,6 +26,7 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     created_at: Optional[datetime]
+    is_active: bool
 
     class Config:
         from_attributes = True

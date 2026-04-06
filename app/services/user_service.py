@@ -50,7 +50,8 @@ def update_user_by_id(db: Session, user_id: int, user_update: UserUpdate):
 def delete_user_by_id(db: Session, user_id: int):
     user = db.query(User).filter(User.id == user_id).first()
     if user:
-        db.delete(user)
+        user.is_active = False
         db.commit()
+        db.refresh(user)
         return True
     return False
