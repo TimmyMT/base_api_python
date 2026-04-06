@@ -6,6 +6,7 @@ from typing import Optional
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=5, max_length=72)
+    password_confirmation: str
 
     @validator('email')
     def validate_email(cls, v):
@@ -13,6 +14,12 @@ class UserCreate(BaseModel):
         email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.match(email_regex, v):
             raise ValueError('Invalid email format')
+        return v
+
+    @validator('password_confirmation')
+    def validate_password_confirmation(cls, v, values):
+        if 'password' in values and v != values['password']:
+            raise ValueError('Password confirmation does not match password')
         return v
 
 class UserResponse(BaseModel):
@@ -26,6 +33,7 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=5, max_length=72)
+    password_confirmation: Optional[str] = None
 
     @validator('email')
     def validate_email(cls, v):
@@ -34,4 +42,11 @@ class UserUpdate(BaseModel):
         email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.match(email_regex, v):
             raise ValueError('Invalid email format')
+        return v
+
+    @validator('password_confirmation')
+    def validate_password_confirmation(cls, v, values):
+        if v is not None and 'password' in values and values['password'] is not None:
+            if v != values['password']:
+                raise ValueError('Password confirmation does not match password')
         return v
