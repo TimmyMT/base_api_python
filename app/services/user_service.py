@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
+from fastapi import HTTPException
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -43,6 +44,18 @@ def update_user_by_id(db: Session, user_id: int, user_update: UserUpdate):
         user.email = user_update.email
     if user_update.password is not None:
         user.password_digest = pwd_context.hash(user_update.password)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def update_user_role(db: Session, user: User, role: str):
+    if role == "admin":
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot assign admin role"
+        )
+
+    user.role = role
     db.commit()
     db.refresh(user)
     return user

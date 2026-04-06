@@ -51,3 +51,6 @@ class UserUpdate(BaseModel):
             if v != values['password']:
                 raise ValueError('Password confirmation does not match password')
         return v
+
+class UserRoleUpdate(BaseModel):
+    role: str

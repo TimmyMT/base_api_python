@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db import get_db
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserRoleUpdate
 from app.services.user_service import (
     create_user,
     get_users,
     get_user_by_id,
     delete_user_by_id,
     update_user_by_id,
+    update_user_role
 )
 from app.params.user_params import validate_create_params, validate_update_params
 from app.dependencies.auth import get_current_user
@@ -81,6 +82,17 @@ def update(
         return update_user_by_id(db, user.id, user_update)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+@router.patch("/{user_id}/role", response_model=UserResponse)
+def update_role(
+    role_data: UserRoleUpdate,
+    user = Depends(get_user_or_404),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    _authorize(current_user, "update_role", user)
+    return update_user_role(db, user, role_data.role)
 
 
 @router.delete("/{user_id}", status_code=204)

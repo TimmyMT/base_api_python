@@ -20,7 +20,7 @@ class UserPolicy:
     def create(self):
         return self._authorize(self.user.role == "admin")
     
-    def change_role(self, target_user: User):
+    def update_role(self, target_user: User):
         return self._authorize(self.user.role == "admin" and target_user.role != "admin")
 
     def update(self, target_user: User):
