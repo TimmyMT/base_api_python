@@ -12,16 +12,16 @@ class UserPolicy:
         return True
 
     def index(self):
-        return self._authorize(self.user.role == "admin")
+        return self._authorize(self.user.role == "admin" or self.user.role == "manager")
 
     def show(self, target_user: User):
-        return self._authorize(self.user.role == "admin" or self.user.id == target_user.id)
+        return self._authorize(self.user.role == "admin" or self.user.role == "manager" or self.user.id == target_user.id)
 
     def create(self):
         return self._authorize(self.user.role == "admin")
 
     def update(self, target_user: User):
-        return self._authorize(self.user.role == "admin" or self.user.id == target_user.id)
+        return self._authorize(self.user.role == "admin" or self.user.role == "manager" or self.user.id == target_user.id)
 
     def destroy(self, target_user: User):
         return self._authorize(self.user.role == "admin")
