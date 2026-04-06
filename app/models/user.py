@@ -11,5 +11,6 @@ class User(Base):
     password_digest = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=True, nullable=False)
+    role = Column(String, nullable=False, default="user")
 
     refresh_tokens = relationship("RefreshToken", back_populates="user")

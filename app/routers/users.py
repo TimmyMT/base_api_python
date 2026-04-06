@@ -12,8 +12,12 @@ from app.services.user_service import (
     update_user_by_id,
 )
 from app.params.user_params import validate_create_params, validate_update_params
+from app.dependencies.auth import get_current_user
+from app.policies.user_policy import UserPolicy
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users"
+)
 
 def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
     user = get_user_by_id(db, user_id)
@@ -22,18 +26,34 @@ def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.get("/users", response_model=List[UserResponse])
-def index(db: Session = Depends(get_db)):
+@router.get("/", response_model=List[UserResponse])
+def index(
+    db: Session = Depends(get_db), 
+    current_user = Depends(get_current_user)
+):
+    if not UserPolicy(current_user).index():
+        raise HTTPException(status_code=403, detail="Not authorized")
     return get_users(db)
 
 
-@router.get("/users/{user_id}", response_model=UserResponse)
-def show(user = Depends(get_user_or_404)):
+@router.get("/{user_id}", response_model=UserResponse)
+def show(
+    user = Depends(get_user_or_404), 
+    current_user = Depends(get_current_user)
+):
+    if not UserPolicy(current_user).show(user):
+        raise HTTPException(status_code=403, detail="Not authorized")
     return user
 
 
-@router.post("/users", response_model=UserResponse, status_code=201)
-def create(user: UserCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=UserResponse, status_code=201)
+def create(
+    user: UserCreate, 
+    db: Session = Depends(get_db), 
+    current_user = Depends(get_current_user)
+):
+    if not UserPolicy(current_user).create():
+        raise HTTPException(status_code=403, detail="Not authorized")
     validate_create_params(user)
     try:
         return create_user(db, user)
@@ -41,8 +61,15 @@ def create(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/users/{user_id}", response_model=UserResponse)
-def update(user_update: UserUpdate, user = Depends(get_user_or_404), db: Session = Depends(get_db)):
+@router.put("/{user_id}", response_model=UserResponse)
+def update(
+    user_update: UserUpdate, 
+    user = Depends(get_user_or_404), 
+    db: Session = Depends(get_db), 
+    current_user = Depends(get_current_user)
+):
+    if not UserPolicy(current_user).update(user):
+        raise HTTPException(status_code=403, detail="Not authorized")
     validate_update_params(user_update)
     try:
         return update_user_by_id(db, user.id, user_update)
@@ -50,6 +77,12 @@ def update(user_update: UserUpdate, user = Depends(get_user_or_404), db: Session
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/users/{user_id}", status_code=204)
-def destroy(user = Depends(get_user_or_404), db: Session = Depends(get_db)):
+@router.delete("/{user_id}", status_code=204)
+def destroy(
+    user = Depends(get_user_or_404), 
+    db: Session = Depends(get_db), 
+    current_user = Depends(get_current_user)
+):
+    if not UserPolicy(current_user).destroy(user):
+        raise HTTPException(status_code=403, detail="Not authorized")
     delete_user_by_id(db, user.id)

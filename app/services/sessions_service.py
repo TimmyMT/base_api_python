@@ -18,7 +18,7 @@ def _verify_password(password: str, hashed: str) -> bool:
 # --- настройки JWT ---
 _JWT_SECRET = "supersecretkey"
 _JWT_ALGORITHM = "HS256"
-_ACCESS_TOKEN_EXPIRE_MINUTES = 30
+_ACCESS_TOKEN_EXPIRE_MINUTES = 60
 _REFRESH_TOKEN_EXPIRE_MINUTES = 120
 
 # --- приватные функции для токенов ---
