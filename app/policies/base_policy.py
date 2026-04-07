@@ -14,7 +14,7 @@ class BasePolicy:
         Проверка прав пользователя на категорию по имени.
         action: "read", "create", "update", "delete"
         """
-        field_name = f"can_{action}"  # например "can_read", "can_create"
+        field_name = f"can_{action}"
         for role in self.user.roles:
             for perm in role.permissions:
                 if perm.category.name == category_name and getattr(perm, field_name, False):
