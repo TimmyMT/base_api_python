@@ -7,6 +7,7 @@ from app.routers.users import router as users_router
 from app.routers.sessions import router as sessions_router
 from app.routers.categories import router as categories_router
 from app.routers.roles import router as roles_router
+from app.routers.permissions import router as permissions_router
 
 
 from app.seed import run_seed
@@ -15,6 +16,7 @@ app = FastAPI()
 
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(sessions_router, prefix="/api/v1")
+app.include_router(permissions_router, prefix="/api/v1")
 app.include_router(categories_router, prefix="/api/v1")
 app.include_router(roles_router, prefix="/api/v1")
 
