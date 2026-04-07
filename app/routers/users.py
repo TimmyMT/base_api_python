@@ -4,7 +4,7 @@ from typing import List
 
 from app.db import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserRoleUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.user_service import (
     create_user,
     get_users,
@@ -19,28 +19,39 @@ from app.policies.base_policy import BasePolicy
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
+# ------------------ HELPERS ------------------
+
+def get_user_or_404(user_id: int, db: Session = Depends(get_db)) -> User:
     user = get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-def _authorize(current_user: User, category_name: str, action: str, target_user: User = None):
+def _authorize(
+    current_user: User,
+    category_name: str,
+    action: str,
+    target_user: User = None
+):
     policy = BasePolicy(current_user)
 
-    # если операция на своем ресурсе
+    # Пользователь всегда может работать со своим профилем
     if target_user and target_user.id == current_user.id:
         return policy.can_own(target_user.id)
 
-    if action == "read":
-        return policy.can_read(category_name)
-    elif action == "write":
-        return policy.can_write(category_name)
-    elif action == "delete":
-        return policy.can_delete(category_name)
-    else:
+    actions = {
+        "read": policy.can_read,
+        "create": policy.can_create,
+        "update": policy.can_update,
+        "delete": policy.can_delete,
+    }
+
+    authorize_action = actions.get(action)
+    if not authorize_action:
         raise HTTPException(status_code=403, detail="Unknown action")
+
+    return authorize_action(category_name)
 
 
 # ------------------ ROUTES ------------------
@@ -71,6 +82,7 @@ def create(
 ):
     _authorize(current_user, "users", "create")
     validate_create_params(user_create)
+
     try:
         return create_user(db, user_create)
     except ValueError as e:
@@ -86,6 +98,7 @@ def update(
 ):
     _authorize(current_user, "users", "update", user)
     validate_update_params(user_update)
+
     try:
         return update_user_by_id(db, user.id, user_update)
     except ValueError as e:
