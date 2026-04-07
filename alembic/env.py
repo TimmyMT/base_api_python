@@ -21,6 +21,9 @@ if config.config_file_name is not None:
 from app.db import Base
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
+from app.models.category import Category
+from app.models.role import Role
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

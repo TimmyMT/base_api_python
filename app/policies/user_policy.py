@@ -11,20 +11,32 @@ class UserPolicy:
             raise HTTPException(status_code=403, detail="Not authorized")
         return True
 
+    # проверка, есть ли роль у пользователя
+    def has_role(self, role_name: str) -> bool:
+        return self.user.has_role(role_name)
+
+    # доступ к списку пользователей
     def index(self):
-        return self._authorize(self.user.role == "admin" or self.user.role == "manager")
+        return self._authorize(
+            self.has_role("admin") or self.has_role("manager")
+        )
 
+    # просмотр конкретного пользователя
     def show(self, target_user: User):
-        return self._authorize(self.user.role == "admin" or self.user.role == "manager" or self.user.id == target_user.id)
+        return self._authorize(
+            self.has_role("admin") or self.has_role("manager") or self.user.id == target_user.id
+        )
 
+    # создание пользователя
     def create(self):
-        return self._authorize(self.user.role == "admin")
-    
-    def update_role(self, target_user: User):
-        return self._authorize(self.user.role == "admin" and target_user.role != "admin")
+        return self._authorize(self.has_role("admin"))
 
+    # обновление пользователя
     def update(self, target_user: User):
-        return self._authorize(self.user.role == "admin" or self.user.role == "manager" or self.user.id == target_user.id)
+        return self._authorize(
+            self.has_role("admin") or self.has_role("manager") or self.user.id == target_user.id
+        )
 
+    # удаление пользователя
     def destroy(self, target_user: User):
-        return self._authorize(self.user.role == "admin")
+        return self._authorize(self.has_role("admin"))
