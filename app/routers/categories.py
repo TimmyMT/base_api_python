@@ -17,7 +17,7 @@ from app.services.category_service import (
     update_category_by_id,
     delete_category_by_id,
 )
-from app.dependencies.auth import get_current_user
+from app.authentication.auth import get_current_user
 
 
 router = APIRouter(prefix="/categories", tags=["Categories"])

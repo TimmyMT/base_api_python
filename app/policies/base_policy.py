@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 class BasePolicy:
     def __init__(self, user: User):
         self.user = user
