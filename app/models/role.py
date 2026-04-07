@@ -15,4 +15,9 @@ class Role(Base):
         secondary=user_roles,
         back_populates="roles"
     )
+    permissions = relationship(
+        "Permission", 
+        back_populates="role", 
+        cascade="all, delete-orphan"
+    )
     

@@ -4,8 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from app.routers.users import router as users_router
 from app.routers.sessions import router as sessions_router
 from app.routers.categories import router as categories_router
-from app.models.user import User
-from app.models.role import Role
+from app.models import User, Role, Category, Permission
 
 from app.seed import run_seed
 
