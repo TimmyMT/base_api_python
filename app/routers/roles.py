@@ -20,7 +20,7 @@ from app.services.user_service import get_user_by_id
 from app.authentication.auth import get_current_user
 from app.policies.base_policy import BasePolicy
 
-router = APIRouter(prefix="/roles")
+router = APIRouter(prefix="/roles", tags=["Roles"])
 
 
 # ----------------- HELPERS -----------------

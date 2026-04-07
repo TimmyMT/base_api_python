@@ -6,15 +6,15 @@ from app.db import get_db
 from app.schemas.refresh_token import SignInRequest, RefreshRequest, LogoutRequest, TokenResponse
 from app.services.sessions_service import create, destroy, update
 
-router = APIRouter()
+router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 # POST /login
-@router.post("/sessions/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse)
 def sign_in(data: SignInRequest, db: Session = Depends(get_db)):
     return create(db, email=data.email, password=data.password)
 
 # PUT /refresh
-@router.put("/sessions/refresh", response_model=TokenResponse)
+@router.put("/refresh", response_model=TokenResponse)
 def update_access_token(request: RefreshRequest, db: Session = Depends(get_db)):
     try:
         tokens = update(db, request.refresh_token)
@@ -23,7 +23,7 @@ def update_access_token(request: RefreshRequest, db: Session = Depends(get_db)):
         raise e
 
 # DELETE /logout
-@router.delete("/sessions/logout", status_code=204)
+@router.delete("/logout", status_code=204)
 def logout(request: LogoutRequest, db: Session = Depends(get_db)):
     destroyed = destroy(db, request.refresh_token)
     if destroyed is False:

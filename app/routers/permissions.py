@@ -16,7 +16,7 @@ from app.services.permission_service import (
 from app.authentication.auth import get_current_user
 from app.policies.base_policy import BasePolicy
 
-router = APIRouter(prefix="/permissions")
+router = APIRouter(prefix="/permissions", tags=["Permissions"])
 
 def _authorize_admin(user: User):
     user.roles[0].name == "admin" or HTTPException(status_code=403, detail="Admin privileges required")

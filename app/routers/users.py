@@ -16,7 +16,7 @@ from app.params.user_params import validate_create_params, validate_update_param
 from app.authentication.auth import get_current_user
 from app.policies.base_policy import BasePolicy
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
 
 
 def get_user_or_404(user_id: int, db: Session = Depends(get_db)):
