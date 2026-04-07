@@ -44,3 +44,23 @@ def delete_role_by_id(db: Session, role_id: int):
         raise ValueError("Role not found")
     db.delete(role)
     db.commit()
+
+
+# ----------------- Логика назначения и снятия роли пользователю -----------------
+
+def assign_role_to_user(db: Session, user: User, role: Role):
+    if role in user.roles:
+        raise ValueError("User already has this role")
+    user.roles.append(role)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def revoke_role_from_user(db: Session, user: User, role: Role):
+    if role not in user.roles:
+        raise ValueError("User does not have this role")
+    user.roles.remove(role)
+    db.commit()
+    db.refresh(user)
+    return user

@@ -2,6 +2,10 @@ from pydantic import BaseModel
 
 # ----------------- SCHEMAS -----------------
 
+class RoleAssignRequest(BaseModel):
+    user_id: int
+    role_id: int
+
 class RoleBase(BaseModel):
     name: str
 
